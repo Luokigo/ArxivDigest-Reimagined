@@ -1,85 +1,97 @@
-# ArxivDigest-Reimagined Configuration
-
 # ============================================
-# arXiv Query Settings
+# arXiv Query Settings (检索设置)
 # ============================================
 arxiv:
-    field: cs # arXiv field abbreviation (check https://arxiv.org/ for field codes)
-    # You can also specify multiple fields:
-    # field:
-    #   - cs
-    #   - math
-    #   - stat
+    # 关键修改：扩大搜索领域，包含计算机、电气工程和物理
+    field: 
+      - cs
+      - eess
+      - physics
+      
+    # 关键修改：使用官方代码，覆盖视觉、大模型、医学成像
     categories:
-        - Computer Vision and Pattern Recognition
-        - Artificial Intelligence
-        - Medical Imaging
-        
-    # To fetch ALL papers from the field(s) without category filtering, use:
-    # categories: ["cs.CL", "cs.AI"]
-    max_results: 40 # 0 means no limit
+      - cs.CV          # 计算机视觉 (核心：医学图像分割、检测)
+      - cs.CL          # 计算与语言 (大模型、报告生成、多模态)
+      - cs.LG          # 机器学习 (深度学习新算法)
+      - cs.AI          # 人工智能综合
+      - eess.IV        # 图像与视频处理 (CT/MRI重建、去噪、超分)
+      - physics.med-ph # 医学物理 (硬核成像原理、放射组学)
+
+    max_results: 100   # 每天抓取上限，建议设大一点，让AI去筛选
 
 # ============================================
-# LLM Settings
+# LLM Settings (模型设置)
 # ============================================
 llm:
-    model: deepseek-chat # only tested with deepseek-chat
+    model: deepseek-chat
     base_url: https://api.deepseek.com
     max_concurrent: 10
     timeout: 60
 
 # ============================================
-# Three-Stage Filtering
+# Three-Stage Filtering (AI 筛选与总结)
 # ============================================
+# 这里是 AI 的大脑，告诉它你是医学影像专家
 user_prompt: |
-    Related to (M)LLMs.
-    Not related to language-specific models or applications.
-    Do not include surveys.
-    Always answer in English.
+    User is a PhD researcher in Medical Imaging AI and Radiology.
+    
+    Target Interests:
+    1. Medical Image Analysis: Segmentation, Detection, Classification (MRI, CT, X-ray, Ultrasound).
+    2. Foundation Models in Healthcare: Med-SAM, Large Vision-Language Models (LVLMs), Radiology Report Generation.
+    3. Image Reconstruction & Enhancement: Denoising, Super-resolution, Fast MRI reconstruction.
+    4. Multimodal Learning: Fusion of pixel data with clinical text/genomics.
+    
+    Negative Constraints (Filter these out):
+    - Exclude Autonomous Driving (BEV, lane detection).
+    - Exclude Face Recognition/DeepFake.
+    - Exclude General surveillance/Pedestrian detection.
+    - Exclude Pure NLP papers (unless related to medical reports).
+    
+    Output Language:
+    - Always answer in Chinese (Simplified). 
+    # 如果你想看英文总结，把上面这句改成: Always answer in English.
 
+# 第一阶段：粗筛 (通过标题过滤)
 stage1:
     enabled: true
     threshold: 0.5
     temperature: 0.0
 
+# 第二阶段：细筛 (通过摘要过滤)
 stage2:
     enabled: true
     threshold: 0.7
     temperature: 0.1
 
+# 第三阶段：深度总结 (生成最终日报)
 stage3:
     enabled: true
     threshold: 0.8
     temperature: 0.3
-    max_text_chars: 40000 # Maximum number of characters from the paper text (title + abstract) to include
+    max_text_chars: 40000 
+    # 自定义输出字段 (已汉化，方便阅读)
     custom_fields:
         - name: key_innovations
           description: |
-              List the core innovations and main contributions of the paper,
-              including new methods, technologies, or discoveries
+              列出论文的核心创新点（Novelty），包括提出的新模块、损失函数或训练策略。
         - name: technical_approach
           description: |
-              Outline the technical methods used in the paper,
-              including model architecture, algorithms, or experimental design
+              简述技术路线：包括模型架构（如 Transformer/CNN/Diffusion）、数据集和实验设置。
+        - name: clinical_value
+          description: |
+              (重要) 评估该方法的临床应用价值或对医学影像领域的潜在贡献。
         - name: limitations
           description: |
-              Identify the limitations, potential issues, or areas for future improvement in the paper
-        - name: potential_impact
-          description: |
-              Assess the potential impact of the paper on the field,
-              including practical applications and research significance
-        # - name: is_100_percent_relevant
-        #   description: |
-        #     Whether the paper is 100% relevant to the user prompt
+              指出论文提到的局限性或未解决的问题。
 
 # ============================================
-# Abstract Highlighting Settings
+# Abstract Highlighting Settings (高亮设置)
 # ============================================
 highlight:
     temperature: 0.0
 
 # ============================================
-# Cache Settings
+# Cache Settings (缓存设置)
 # ============================================
 cache:
     dir: .cache
@@ -87,7 +99,7 @@ cache:
     expire_days: 30
 
 # ============================================
-# Crawler Settings
+# Crawler Settings (爬虫设置)
 # ============================================
 crawler:
     max_concurrent: 5
