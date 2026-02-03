@@ -50,6 +50,10 @@ jobs:
         working-directory: ./backend
         env:
           API_KEY: ${{ secrets.API_KEY }}
+          API_BASE: ${{ secrets.API_BASE }}
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          TO: ${{ secrets.TO }}
         run: |
           uv run main.py
 
