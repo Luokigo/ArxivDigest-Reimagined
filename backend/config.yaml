@@ -13,8 +13,10 @@ arxiv:
     categories:
         - Computer Vision and Pattern Recognition
         - Artificial Intelligence
+        - Medical Imaging
+        
     # To fetch ALL papers from the field(s) without category filtering, use:
-    # categories: []
+    # categories: ["cs.CL", "cs.AI"]
     max_results: 40 # 0 means no limit
 
 # ============================================
@@ -33,7 +35,7 @@ user_prompt: |
     Related to (M)LLMs.
     Not related to language-specific models or applications.
     Do not include surveys.
-    Always answer in Chinese.
+    Always answer in English.
 
 stage1:
     enabled: true
